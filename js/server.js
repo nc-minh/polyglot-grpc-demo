@@ -1,25 +1,32 @@
+const PROTO_PATH = __dirname + '/proto/greeter.proto';
+
 const grpc = require('@grpc/grpc-js');
-const messages = require('./proto/greeter_pb');
-const services = require('./proto/greeter_grpc_pb');
+const protoLoader = require('@grpc/proto-loader');
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const greeter_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
 
 function sayHello(call, callback) {
-  const reply = new messages.HelloReply();
-  reply.setMessage('Hello ' + call.request.getName());
-  callback(null, reply);
+  console.log(`Received request: ${call.request.name}`);
+  callback(null, { message: 'Hello ' + call.request.name });
 }
 
-function server() {
+function main() {
   const server = new grpc.Server();
-
-  server.addService(services.GreeterService, { sayHello: sayHello });
-
+  server.addService(greeter_proto.Greeter.service, { sayHello: sayHello });
   server.bindAsync(
-    '0.0.0.0:50051',
+    '0.0.0.0:5050',
     grpc.ServerCredentials.createInsecure(),
     () => {
+      console.log('Server running at http://localhost:5050');
       server.start();
     }
   );
 }
 
-server();
+main();

@@ -1,35 +1,40 @@
-const parseArgs = require('minimist');
-const messages = require('./proto/greeter_pb');
-const services = require('./proto/greeter_grpc_pb');
+const PROTO_PATH = __dirname + '/proto/greeter.proto';
 
+const parseArgs = require('minimist');
 const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
+
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
 
 function main() {
   const argv = parseArgs(process.argv.slice(2), {
     string: 'target',
   });
-  var target;
+  let target;
   if (argv.target) {
     target = argv.target;
   } else {
-    target = 'localhost:50051';
+    target = 'localhost:6060';
   }
-
-  const client = new services.GreeterClient(
+  const client = new hello_proto.Greeter(
     target,
     grpc.credentials.createInsecure()
   );
-
-  const request = new messages.HelloRequest();
-  var user;
+  let user;
   if (argv._.length > 0) {
     user = argv._[0];
   } else {
     user = 'world';
   }
-  request.setName(user);
-  client.sayHello(request, function (err, response) {
-    console.log('Greeting:', response.getMessage());
+  client.sayHello({ name: user }, function (err, response) {
+    console.log('Greeting:', response?.message);
   });
 }
 

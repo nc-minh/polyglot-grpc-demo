@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
+    "client": "node greeter_client.js",
     "gen-grpc": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:. --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin` ./proto/greeter.proto"
   },
   "author": "",
@@ -13,7 +14,6 @@
     "@grpc/grpc-js": "^1.8.13",
     "@grpc/proto-loader": "^0.7.6",
     "google-protobuf": "^3.21.2",
-    "grpc": "^1.24.11",
     "minimist": "^1.2.8"
   }
 }
